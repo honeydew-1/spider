@@ -58,6 +58,7 @@ namespace spider
     public class Deck
     {
         public static List<Card> deck = new List<Card>();
+        public static List<Card> imageDeck = new List<Card>();
         
         public Deck()
         {
@@ -72,6 +73,7 @@ namespace spider
                 Card.Suits suit = (Card.Suits)(Math.Floor((decimal)i/13));
                 int val = (i % 13) + 1;
                 deck.Add(new Card(val, suit));
+                imageDeck.Add(new Card(val, suit));
             }
             for (int n = deck.Count - 1; n > 0; --n)
             {
@@ -169,7 +171,7 @@ namespace spider
             BackColor = Color.DarkGreen;
             FormBorderStyle =FormBorderStyle.None;
             WindowState=FormWindowState.Maximized;
-            foreach (Card c in Deck.deck) 
+            foreach (Card c in Deck.imageDeck) 
                 images[c.Name] = Image.FromFile(Path.Combine("PNG", c.Name+".png"));
             images.Add("BACK",Image.FromFile(Path.Combine("PNG", "Back"+".png")));
             InitializeComponent();   
@@ -184,7 +186,7 @@ namespace spider
                 int h = this.Height - (deckImg.Height / 2);
                 g.DrawImage(deckImg, w, h);
 
-            }
+            } 
             int x = 10;
             for (int i = 0; i < 10; i++)
             {
@@ -195,7 +197,7 @@ namespace spider
                     Card c = Piles.piles[i][j];
                     if (c.Hidden) img = images["BACK"];
                     else img = images[c.Name]; 
-                    g.DrawImage(img, 10, y);
+                    g.DrawImage(img, x, y);
                     y += 50;
                 }
                 x += 197;

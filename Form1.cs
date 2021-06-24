@@ -8,14 +8,11 @@ namespace spider
 {
     public class Card
     {
-        #region Card properties
         public enum Suits {C = 0, D, H, S}
         public int Value { get; set; }
         public Suits Suit { get; set; }
         public string Color;
-        public bool Hidden;
-        
-        #endregion
+        public bool Hidden;        
         public Card(int value, Suits suit, bool hidden = true)
         {
             this.Value = value;
@@ -114,7 +111,7 @@ namespace spider
         {
             foreach (List<Card> subPiles in piles) 
             {
-                if (subPiles.Count < 0 ) emptyPileExists = true;
+                if (subPiles.Count < 0) emptyPileExists = true;
             }
             {
                 for (int i = 0; i < 10; i++)
@@ -128,48 +125,42 @@ namespace spider
         }
         public void _moveCard(int atPile, int fromCard, int toNextPile)
         {
-            for (int i = fromCard; i < piles[atPile].Count; i++) piles[toNextPile].Add(piles[atPile][i]); 
-            piles[atPile].RemoveRange(fromCard, piles[atPile].Count - fromCard);
-            piles[atPile][piles[atPile].Count - 1].Hidden = false;
+            for (int i = fromCard; i < piles[atPile].Count; i++) 
+            {
+                Card c = piles[atPile][i];
+                piles[toNextPile].Add(piles[atPile][i]); 
+            }
+            if (fromCard == 0) piles[atPile].Clear();
+            else 
+            {
+                piles[atPile].RemoveRange(fromCard, piles[atPile].Count - fromCard);
+                piles[atPile][piles[atPile].Count - 1].Hidden = false;
+            }
         }
+
         public void moveCard(int atPile, int fromCard, int toNextPile, int suitCount)
         {
             int pileLength = piles[atPile].Count;
-            Card firstCard = piles[atPile][fromCard];
+            Card cardToMove = piles[atPile][fromCard];
             Card cardToCheck = piles[toNextPile][piles[toNextPile].Count - 1];
 
             if (suitCount == 1)
             {
-                for (int i = fromCard; i < pileLength; i++)
-                {
-                    Card curCard = piles[atPile][i]; 
-                    if (curCard.Value + 1 == cardToCheck.Value) _moveCard(atPile, i, toNextPile);
-                }   
+                if (cardToMove.Value + 1 == cardToCheck.Value) _moveCard(atPile, fromCard, toNextPile);
             }
 
             if (suitCount == 2)
             {
-                for (int i = fromCard; i < pileLength; i++)
-                {
-                    Card curCard = piles[atPile][i];
-                    if (curCard.Value + 1 == cardToCheck.Value
-                        && curCard.Color == cardToCheck.Color) 
-                            _moveCard(atPile, i, toNextPile);
-                }   
+                if (cardToMove.Color == cardToCheck.Color && cardToMove.Value + 1 == cardToCheck.Value) _moveCard(atPile, fromCard, toNextPile);
             }
 
             if (suitCount == 4)
             {
-                for (int i = fromCard; i < pileLength; i++)
-                {
-                    Card curCard = piles[atPile][i];
-                    if (curCard.Value + 1 == cardToCheck.Value
-                        && curCard.Suit == cardToCheck.Suit) 
-                            _moveCard(atPile, i, toNextPile);
-                }      
+                if (cardToMove.Suit == cardToCheck.Suit && cardToMove.Value + 1 == cardToCheck.Value) _moveCard(atPile, fromCard, toNextPile);
             }
         }
     }  
+
     public partial class Form1 : Form
     {
         Deck deck = new Deck();
@@ -210,7 +201,7 @@ namespace spider
                     g.DrawImage(img, x, y);
                     y += 50;
                 }
-                x += 197;
+                x += 150;
             }
         }        
         protected override void OnMouseDown(MouseEventArgs args) 
@@ -223,7 +214,8 @@ namespace spider
                 Rectangle deckSize = new Rectangle(w,h,img.Width, img.Width);
                 if (deckSize.Contains(args.Location)) 
                 {
-                    if (piles.emptyPileExists) MessageBox.Show("Can't draw from deck while a pile is empty.");
+                    if (piles.emptyPileExists) 
+                        MessageBox.Show("Can't draw from the deck while there is an empty pile");
                     else 
                     {
                         piles.addToPiles();
@@ -231,6 +223,6 @@ namespace spider
                     }
                 }
             }
-        }
+        }   
     }
 }

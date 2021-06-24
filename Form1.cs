@@ -57,11 +57,13 @@ namespace spider
     }
     public class Deck
     {
-        public static List<Card> deck = new List<Card>();
-        public static List<Card> imageDeck = new List<Card>();
+        public static List<Card> deck;
+        public static List<Card> imageDeck;
         
         public Deck()
         {
+            deck = new List<Card>();
+            imageDeck = new List<Card>();
             for (int i = 0; i < 2; i++) fillDeck();
         }
 
@@ -82,7 +84,6 @@ namespace spider
                 deck[n] = deck[k];
                 deck[k] = temp;
             }
-               
         }
         public static Card drawFromDeck()
         {
@@ -93,13 +94,17 @@ namespace spider
     }
     public class Piles
     {
-        public static List<List<Card>> piles = new List<List<Card>>();
+        public static List<List<Card>> piles;
+        public bool emptyPileExists;
         public Piles()
         {
+            piles = new List<List<Card>>();
             for (int i = 0; i < 10; i++)
             {
+                int fiveOrSix = 5;
+                if (i < 4) fiveOrSix = 6;
                 List<Card> subPiles = new List<Card>();
-                for (int j = 0; j < 5; j++) subPiles.Add(Deck.drawFromDeck());
+                for (int j = 0; j < fiveOrSix; j++) subPiles.Add(Deck.drawFromDeck());
                 piles.Add(subPiles);
                 int pileSize = piles[i].Count - 1;
                 piles[i][pileSize].Hidden = false;
@@ -107,13 +112,19 @@ namespace spider
         }
         public void addToPiles()
         {
-            for (int i = 0; i < 10; i++)
+            foreach (List<Card> subPiles in piles) 
+            {
+                if (subPiles.Count < 0 ) emptyPileExists = true;
+            }
+            {
+                for (int i = 0; i < 10; i++)
                 for (int j = 0; j < 1; j++) 
                 {
                     Card c = Deck.drawFromDeck();
                     c.Hidden = false;
                     piles[i].Add(c);
                 }
+            }
         }
         public void _moveCard(int atPile, int fromCard, int toNextPile)
         {
@@ -161,8 +172,8 @@ namespace spider
     }  
     public partial class Form1 : Form
     {
-        Deck d = new Deck();
-        Piles p = new Piles();
+        Deck deck = new Deck();
+        Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
         public Form1()
         {   
@@ -185,14 +196,13 @@ namespace spider
                 int w = this.Width - (deckImg.Width / 2);
                 int h = this.Height - (deckImg.Height / 2);
                 g.DrawImage(deckImg, w, h);
-
             } 
             int x = 10;
             for (int i = 0; i < 10; i++)
             {
                 int y = 10;
                 Image img = null;
-                for (int j = 0; j < 5; j++)
+                for (int j = 0; j < Piles.piles[i].Count; j++)
                 {
                     Card c = Piles.piles[i][j];
                     if (c.Hidden) img = images["BACK"];
@@ -201,6 +211,25 @@ namespace spider
                     y += 50;
                 }
                 x += 197;
+            }
+        }        
+        protected override void OnMouseDown(MouseEventArgs args) 
+        {
+            Image img = images["BACK"];
+            if (Deck.deck.Count > 0)
+            {
+                int w = this.Width - (img.Width / 2);
+                int h = this.Height - (img.Height / 2);
+                Rectangle deckSize = new Rectangle(w,h,img.Width, img.Width);
+                if (deckSize.Contains(args.Location)) 
+                {
+                    if (piles.emptyPileExists) MessageBox.Show("Can't draw from deck while a pile is empty.");
+                    else 
+                    {
+                        piles.addToPiles();
+                        this.Refresh();
+                    }
+                }
             }
         }
     }

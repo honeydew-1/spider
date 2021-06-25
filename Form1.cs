@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace spider
 {
@@ -146,23 +147,31 @@ namespace spider
 
             if (suitCount == 1)
             {
-                if (cardToMove.Value + 1 == cardToCheck.Value) _moveCard(atPile, fromCard, toNextPile);
+                if (cardToMove.Value + 1 == cardToCheck.Value)
+                     _moveCard(atPile, fromCard, toNextPile);
             }
 
             if (suitCount == 2)
             {
-                if (cardToMove.Color == cardToCheck.Color && cardToMove.Value + 1 == cardToCheck.Value) _moveCard(atPile, fromCard, toNextPile);
+                if (cardToMove.Color == cardToCheck.Color 
+                    && cardToMove.Value + 1 == cardToCheck.Value)
+                        _moveCard(atPile, fromCard, toNextPile);
             }
 
             if (suitCount == 4)
             {
-                if (cardToMove.Suit == cardToCheck.Suit && cardToMove.Value + 1 == cardToCheck.Value) _moveCard(atPile, fromCard, toNextPile);
+                if (cardToMove.Suit == cardToCheck.Suit 
+                    && cardToMove.Value + 1 == cardToCheck.Value)
+                        _moveCard(atPile, fromCard, toNextPile);
             }
         }
     }  
 
     public partial class Form1 : Form
     {
+        int pileNum = 0;
+        int pileFrom = 0;
+        int pileTo = 0;
         Deck deck = new Deck();
         Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
@@ -173,6 +182,7 @@ namespace spider
             BackColor = Color.DarkGreen;
             FormBorderStyle =FormBorderStyle.None;
             WindowState=FormWindowState.Maximized;
+            DoubleBuffered = true;
             foreach (Card c in Deck.imageDeck) 
                 images[c.Name] = Image.FromFile(Path.Combine("PNG", c.Name+".png"));
             images.Add("BACK",Image.FromFile(Path.Combine("PNG", "Back"+".png")));
@@ -223,6 +233,24 @@ namespace spider
                     }
                 }
             }
+
+            #region pile locations
+            if (Enumerable.Range(10, 136).Contains(args.X)) pileNum = 0;
+            if (Enumerable.Range(160, 286).Contains(args.X)) pileNum = 1;
+            if (Enumerable.Range(310, 436).Contains(args.X)) pileNum = 2;
+            if (Enumerable.Range(460, 586).Contains(args.X)) pileNum = 3;
+            if (Enumerable.Range(610, 736).Contains(args.X)) pileNum = 4;
+            if (Enumerable.Range(760, 876).Contains(args.X)) pileNum = 5;
+            if (Enumerable.Range(910, 1036).Contains(args.X)) pileNum = 6;
+            if (Enumerable.Range(1060, 1186).Contains(args.X)) pileNum = 7;
+            if (Enumerable.Range(1210, 1336).Contains(args.X)) pileNum = 8;
+            if (Enumerable.Range(1360, 1486).Contains(args.X)) pileNum = 9;
+            #endregion
+
+            if (args.Button == MouseButtons.Left) pileFrom = pileNum;
+            if (args.Button == MouseButtons.Right) pileTo = pileNum;
+
+            MessageBox.Show($"{args.Location}");
         }   
     }
 }

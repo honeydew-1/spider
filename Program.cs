@@ -25,7 +25,7 @@ namespace spider
                     break;
                 default:
                     WriteLine("unknown option: " + args[i]);
-                    WriteLine("usage: [-seed <num>]");
+                    WriteLine("usage: [-sc <num>]");
                     return;
             }
             Application.SetHighDpiMode(HighDpiMode.SystemAware);

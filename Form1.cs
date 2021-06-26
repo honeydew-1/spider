@@ -124,6 +124,28 @@ namespace spider
                 }
             }
         }
+
+        static int lis(int[] arr, int n)
+        {
+            int[] lis = new int[n];
+            int i, j, max = 0;
+    
+            for (i = 0; i < n; i++)
+                lis[i] = 1;
+    
+            
+            for (i = 1; i < n; i++)
+                for (j = 0; j < i; j++)
+                    if (arr[i] > arr[j] && lis[i] < lis[j] + 1)
+                        lis[i] = lis[j] + 1;
+    
+            
+            for (i = 0; i < n; i++)
+                if (max < lis[i])
+                    max = lis[i];
+    
+            return max;
+        } 
         public void _moveCard(int atPile, int fromCard, int toNextPile)
         {
             for (int i = fromCard; i < piles[atPile].Count; i++) 
@@ -138,32 +160,42 @@ namespace spider
                 piles[atPile][piles[atPile].Count - 1].Hidden = false;
             }
         }
-
         public void moveCard(int atPile, int fromCard, int toNextPile, int suitCount)
         {
             int pileLength = piles[atPile].Count;
             Card cardToMove = piles[atPile][fromCard];
-            Card cardToCheck = piles[toNextPile][piles[toNextPile].Count - 1];
-
-            if (suitCount == 1)
+            if (piles[toNextPile].Count > 0) 
             {
-                if (cardToMove.Value + 1 == cardToCheck.Value)
-                     _moveCard(atPile, fromCard, toNextPile);
-            }
-
-            if (suitCount == 2)
-            {
-                if (cardToMove.Color == cardToCheck.Color 
-                    && cardToMove.Value + 1 == cardToCheck.Value)
+                Card cardToCheck = piles[toNextPile][piles[toNextPile].Count - 1];
+            
+                if (suitCount == 1)
+                {
+                    if (cardToMove.Value + 1 == cardToCheck.Value)
                         _moveCard(atPile, fromCard, toNextPile);
-            }
+                }
 
-            if (suitCount == 4)
-            {
-                if (cardToMove.Suit == cardToCheck.Suit 
-                    && cardToMove.Value + 1 == cardToCheck.Value)
-                        _moveCard(atPile, fromCard, toNextPile);
+                if (suitCount == 2)
+                {
+                    if (cardToMove.Color == cardToCheck.Color 
+                        && cardToMove.Value + 1 == cardToCheck.Value)
+                            _moveCard(atPile, fromCard, toNextPile);
+                }
+
+                if (suitCount == 4)
+                {
+                    if (cardToMove.Suit == cardToCheck.Suit 
+                        && cardToMove.Value + 1 == cardToCheck.Value)
+                            _moveCard(atPile, fromCard, toNextPile);
+                }
             }
+            else _moveCard(atPile, fromCard, toNextPile);
+            
+            if (piles[toNextPile].Count >= 13) checkStreak(toNextPile);
+        }
+
+        public void checkStreak(int pile)
+        {
+            
         }
     }  
 
@@ -174,6 +206,7 @@ namespace spider
         int pileTo = 0;
         int fromCard = 0;
         int suitCount = 0;
+        bool emptyPileExists = false;
         Deck deck = new Deck();
         Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
@@ -216,7 +249,8 @@ namespace spider
                 }
                 x += 150;
             }
-        }        
+        }   
+        bool inRange(int lo, int val, int hi) => lo < val && hi > val;    
         protected override void OnMouseDown(MouseEventArgs args) 
         {
             Image img = images["BACK"];
@@ -227,13 +261,19 @@ namespace spider
                 Rectangle deckSize = new Rectangle(w,h,img.Width, img.Width);
                 if (deckSize.Contains(args.Location)) 
                 {
-                    if (piles.emptyPileExists) 
-                        MessageBox.Show("Can't draw from the deck while there is an empty pile");
-                    else 
+                    for (int i = 0; i < 10; i++) 
+                        if (Piles.piles[i].Count == 0)
+                        {
+                            MessageBox.Show("Can't draw from the deck while there is an empty pile");
+                            emptyPileExists = true;
+                        }
+                    if (!emptyPileExists) 
                     {
                         piles.addToPiles();
                         this.Refresh();
-                    }
+                        emptyPileExists = false;
+                    }    
+                    
                 }
             }
 
@@ -250,21 +290,28 @@ namespace spider
             else if (inRange(1360, args.X, 1486)) pileNum = 9;
             #endregion
 
-            if (args.Button == MouseButtons.Left) pileFrom = pileNum;
+            if (args.Button == MouseButtons.Left) 
+            {
+                pileFrom = pileNum;
+                int pileImgSize = ((Piles.piles[pileFrom].Count - 1) * 50) + 10;
+                fromCard = (args.Y / 55);    
+                if (fromCard >= Piles.piles[pileFrom].Count) fromCard = Piles.piles[pileFrom].Count - 1;
+            }
             if (args.Button == MouseButtons.Right) 
             {
                 pileTo = pileNum;
-                int pileImgSize = ((Piles.piles[pileFrom].Count - 1) * 50) + 10;
-                fromCard = (args.Y / 55);
-                if (fromCard >= Piles.piles[pileFrom].Count) fromCard = Piles.piles[pileFrom].Count - 1;
-                if (inRange(pileImgSize, args.Y, pileImgSize + 200)) fromCard = Piles.piles[pileFrom].Count - 1;
-                    
-                if (Piles.piles[pileFrom][fromCard].Hidden == false) 
-                    piles.moveCard(pileFrom, fromCard, pileTo, suitCount);
+                piles.moveCard(pileFrom, fromCard, pileTo, suitCount);
                 this.Refresh();
-                fromCard = 0;
+                List<Card> curPile = Piles.piles[pileTo];
+                if (curPile.Count >= 13 && curPile[curPile.Count - 13].Hidden == false)
+                {
+                    for (int i = curPile.Count - 13; i < curPile.Count; i++)
+                    if (curPile[i].Value > curPile[i + 1].Value)
+                    {
+                        curPile.RemoveRange(curPile.Count - 13, 13);
+                    }
+                }
             }
         }
-        bool inRange(int lo, int val, int hi) => lo < val && hi > val;
     }
 }

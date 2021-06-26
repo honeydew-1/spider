@@ -172,11 +172,14 @@ namespace spider
         int pileNum = 0;
         int pileFrom = 0;
         int pileTo = 0;
+        int fromCard = 0;
+        int suitCount = 0;
         Deck deck = new Deck();
         Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
-        public Form1()
+        public Form1(int suitCount)
         {   
+            this.suitCount = suitCount;
             Text = "Spider Solitaire";
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.DarkGreen;
@@ -235,22 +238,33 @@ namespace spider
             }
 
             #region pile locations
-            if (Enumerable.Range(10, 136).Contains(args.X)) pileNum = 0;
-            if (Enumerable.Range(160, 286).Contains(args.X)) pileNum = 1;
-            if (Enumerable.Range(310, 436).Contains(args.X)) pileNum = 2;
-            if (Enumerable.Range(460, 586).Contains(args.X)) pileNum = 3;
-            if (Enumerable.Range(610, 736).Contains(args.X)) pileNum = 4;
-            if (Enumerable.Range(760, 876).Contains(args.X)) pileNum = 5;
-            if (Enumerable.Range(910, 1036).Contains(args.X)) pileNum = 6;
-            if (Enumerable.Range(1060, 1186).Contains(args.X)) pileNum = 7;
-            if (Enumerable.Range(1210, 1336).Contains(args.X)) pileNum = 8;
-            if (Enumerable.Range(1360, 1486).Contains(args.X)) pileNum = 9;
+            if (inRange(10, args.X, 136)) pileNum = 0;
+            else if (inRange(160, args.X, 286)) pileNum = 1;
+            else if (inRange(310, args.X, 436)) pileNum = 2;
+            else if (inRange(460, args.X, 586)) pileNum = 3;
+            else if (inRange(610, args.X, 736)) pileNum = 4;
+            else if (inRange(760, args.X, 876)) pileNum = 5;
+            else if (inRange(910, args.X, 1036)) pileNum = 6;
+            else if (inRange(1060, args.X, 1186)) pileNum = 7;
+            else if (inRange(1210, args.X, 1336)) pileNum = 8;
+            else if (inRange(1360, args.X, 1486)) pileNum = 9;
             #endregion
 
             if (args.Button == MouseButtons.Left) pileFrom = pileNum;
-            if (args.Button == MouseButtons.Right) pileTo = pileNum;
-
-            MessageBox.Show($"{args.Location}");
-        }   
+            if (args.Button == MouseButtons.Right) 
+            {
+                pileTo = pileNum;
+                int pileImgSize = ((Piles.piles[pileFrom].Count - 1) * 50) + 10;
+                fromCard = (args.Y / 55);
+                if (fromCard >= Piles.piles[pileFrom].Count) fromCard = Piles.piles[pileFrom].Count - 1;
+                if (inRange(pileImgSize, args.Y, pileImgSize + 200)) fromCard = Piles.piles[pileFrom].Count - 1;
+                    
+                if (Piles.piles[pileFrom][fromCard].Hidden == false) 
+                    piles.moveCard(pileFrom, fromCard, pileTo, suitCount);
+                this.Refresh();
+                fromCard = 0;
+            }
+        }
+        bool inRange(int lo, int val, int hi) => lo < val && hi > val;
     }
 }

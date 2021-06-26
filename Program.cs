@@ -15,7 +15,7 @@ namespace spider
         [STAThread]
         static void Main(string[] args)
         {
-            int suitCount = 0;
+            int suitCount = 1;
             for (int i = 0 ; i < args.Length ; ++i)
             switch (args[i]) 
             {
@@ -25,7 +25,7 @@ namespace spider
                     break;
                 default:
                     WriteLine("unknown option: " + args[i]);
-                    WriteLine("usage: [-sc <num>]");
+                    WriteLine("usage: [-sc <num>]");    
                     return;
             }
             Application.SetHighDpiMode(HighDpiMode.SystemAware);

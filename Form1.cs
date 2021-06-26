@@ -6,145 +6,129 @@ using System.Windows.Forms;
 
 namespace spider
 {
+    public enum Suit {C, D, H, S}
+
     public class Card
     {
-        public enum Suits {C = 0, D, H, S}
+        
+        public enum Color{RED, BLACK}
         public int Value { get; set; }
-        public Suits Suit { get; set; }
-        public string Color;
-        public bool Hidden;        
-        public Card(int value, Suits suit, bool hidden = true)
+        public Suit Rank { get; set; }
+        public Color RB;
+        public bool Hidden;  
+
+        public Card(int value, Suit rank, bool hidden = true)
         {
             this.Value = value;
-            this.Suit = suit;
+            this.Rank = rank;
+            if (this.Rank == Suit.H || this.Rank == Suit.D) this.RB = Color.RED;
+            if (this.Rank == Suit.C || this.Rank == Suit.S) this.RB = Color.BLACK;
             this.Hidden = hidden;
-            if (this.Suit == Suits.H || this.Suit == Suits.D) this.Color = "R";
-            if (this.Suit == Suits.C || this.Suit == Suits.S) this.Color = "B";
         }
+
         private string NamedValue
         {
             get
             {
-                string name = string.Empty;
                 switch (Value)
                 {
-                    case (1):
-                        name = "A";
-                        break;
-                    case (13):
-                        name = "K";
-                        break;
-                    case (12):
-                        name = "Q";
-                        break;
-                    case (11):
-                        name = "J";
-                        break;
-                    default:
-                        name = Value.ToString();
-                        break;
+                    case 1: return "A";
+                    case 13: return "K";
+                    case 12: return "Q";
+                    case 11: return "J";
+                    default: return Value.ToString();
                 }
-                return name;
             }
         }
+
         public string Name
         {
-            get => NamedValue + Suit.ToString();
+            get => NamedValue + Rank.ToString();
         }
     }
+
     public class Deck
     {
-        public static List<Card> deck;
-        public static List<Card> imageDeck;
+        public List<Card> deck;
+        
         
         public Deck()
         {
             deck = new List<Card>();
-            imageDeck = new List<Card>();
             for (int i = 0; i < 2; i++) fillDeck();
         }
-
+        
         private void fillDeck()
         {
-            Random r = new Random();
             for (int i = 0; i < 52; i++)
             {
-                Card.Suits suit = (Card.Suits)(Math.Floor((decimal)i/13));
+                Suit rank = (Suit)(Math.Floor((decimal)i/13));
                 int val = (i % 13) + 1;
-                deck.Add(new Card(val, suit));
-                imageDeck.Add(new Card(val, suit));
+                deck.Add(new Card(val, rank));
             }
+
+            Random r = new Random();
             for (int n = deck.Count - 1; n > 0; --n)
             {
                 int k = r.Next(n+1);
                 Card temp = deck[n];
-                deck[n] = deck[k];
-                deck[k] = temp;
+                this[n] = this[k];
+                this[k] = temp;
             }
         }
-        public static Card drawFromDeck()
+
+        public int Count 
         {
-            Card c = deck[deck.Count - 1];
-            deck.RemoveAt(deck.Count - 1);
+            get => deck.Count;
+        }
+
+        public Card this[int i]
+        {
+            get => deck[i];
+            set => deck[i] = value;
+        }
+
+        public Card drawFromDeck()
+        {
+            Card c = this[this.Count - 1];
+            deck.RemoveAt(this.Count - 1);
             return c;
         }
     }
+
     public class Piles
     {
         public static List<List<Card>> piles;
-        public bool emptyPileExists;
+
+        Deck deck = new Deck();
+
         public Piles()
         {
             piles = new List<List<Card>>();
+            
             for (int i = 0; i < 10; i++)
             {
                 int fiveOrSix = 5;
                 if (i < 4) fiveOrSix = 6;
                 List<Card> subPiles = new List<Card>();
-                for (int j = 0; j < fiveOrSix; j++) subPiles.Add(Deck.drawFromDeck());
+                for (int j = 0; j < fiveOrSix; j++) subPiles.Add(deck.drawFromDeck());
                 piles.Add(subPiles);
                 int pileSize = piles[i].Count - 1;
                 piles[i][pileSize].Hidden = false;
             }
         }
+
         public void addToPiles()
         {
-            foreach (List<Card> subPiles in piles) 
-            {
-                if (subPiles.Count < 0) emptyPileExists = true;
-            }
-            {
                 for (int i = 0; i < 10; i++)
-                for (int j = 0; j < 1; j++) 
-                {
-                    Card c = Deck.drawFromDeck();
-                    c.Hidden = false;
-                    piles[i].Add(c);
-                }
-            }
+                    for (int j = 0; j < 1; j++) 
+                    {
+                        Card c = deck.drawFromDeck();
+                        c.Hidden = false;
+                        piles[i].Add(c);
+                    }
         }
 
-        static int lis(int[] arr, int n)
-        {
-            int[] lis = new int[n];
-            int i, j, max = 0;
-    
-            for (i = 0; i < n; i++)
-                lis[i] = 1;
-    
-            
-            for (i = 1; i < n; i++)
-                for (j = 0; j < i; j++)
-                    if (arr[i] > arr[j] && lis[i] < lis[j] + 1)
-                        lis[i] = lis[j] + 1;
-    
-            
-            for (i = 0; i < n; i++)
-                if (max < lis[i])
-                    max = lis[i];
-    
-            return max;
-        } 
         public void _moveCard(int atPile, int fromCard, int toNextPile)
         {
             for (int i = fromCard; i < piles[atPile].Count; i++) 
@@ -152,13 +136,29 @@ namespace spider
                 Card c = piles[atPile][i];
                 piles[toNextPile].Add(piles[atPile][i]); 
             }
+
             if (fromCard == 0) piles[atPile].Clear();
             else 
             {
                 piles[atPile].RemoveRange(fromCard, piles[atPile].Count - fromCard);
                 piles[atPile][piles[atPile].Count - 1].Hidden = false;
             }
+
+            List<Card> curPile = Piles.piles[toNextPile];
+            if (curPile.Count >= 13 && curPile[curPile.Count - 13].Hidden == false)
+                {
+                    for (int i = curPile.Count - 13; i < curPile.Count; i++)
+                    if (curPile[i].Value > curPile[i + 1].Value)
+                    {
+                        if (curPile.Count > 13)
+                        {
+                            curPile[curPile.Count - 14].Hidden = false;
+                        }
+                        curPile.RemoveRange(curPile.Count - 13, 13);
+                    }
+                }
         }
+
         public void moveCard(int atPile, int fromCard, int toNextPile, int suitCount)
         {
             int pileLength = piles[atPile].Count;
@@ -175,14 +175,14 @@ namespace spider
 
                 if (suitCount == 2)
                 {
-                    if (cardToMove.Color == cardToCheck.Color 
+                    if (cardToMove.RB == cardToCheck.RB 
                         && cardToMove.Value + 1 == cardToCheck.Value)
                             _moveCard(atPile, fromCard, toNextPile);
                 }
 
                 if (suitCount == 4)
                 {
-                    if (cardToMove.Suit == cardToCheck.Suit 
+                    if (cardToMove.Rank == cardToCheck.Rank 
                         && cardToMove.Value + 1 == cardToCheck.Value)
                             _moveCard(atPile, fromCard, toNextPile);
                 }
@@ -202,30 +202,37 @@ namespace spider
         Deck deck = new Deck();
         Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
+
         public Form1(int suitCount)
         {   
             this.suitCount = suitCount;
             Text = "Spider Solitaire";
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.DarkGreen;
-            FormBorderStyle =FormBorderStyle.None;
             WindowState=FormWindowState.Maximized;
             DoubleBuffered = true;
-            foreach (Card c in Deck.imageDeck) 
-                images[c.Name] = Image.FromFile(Path.Combine("PNG", c.Name+".png"));
+            for (Suit suit = Suit.C ; suit <= Suit.S ; suit++)
+                for (int val = 1 ; val <= 13 ; ++val) 
+                {
+                    Card c = new Card(val, suit);
+                    images[c.Name] = Image.FromFile(Path.Combine("PNG", c.Name+".png"));
+                }
             images.Add("BACK",Image.FromFile(Path.Combine("PNG", "Back"+".png")));
             InitializeComponent();   
         }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            if (Deck.deck.Count > 0)
+
+            if (deck.Count > 0)
             {
                 Image deckImg = images["BACK"];
                 int w = this.Width - (deckImg.Width / 2);
                 int h = this.Height - (deckImg.Height / 2);
                 g.DrawImage(deckImg, w, h);
             } 
+
             int x = 10;
             for (int i = 0; i < 10; i++)
             {
@@ -242,15 +249,19 @@ namespace spider
                 x += 150;
             }
         }   
+
         bool inRange(int lo, int val, int hi) => lo < val && hi > val;    
+        
         protected override void OnMouseDown(MouseEventArgs args) 
         {
             Image img = images["BACK"];
-            if (Deck.deck.Count > 0)
+
+            if (deck.Count > 0)
             {
                 int w = this.Width - (img.Width / 2);
                 int h = this.Height - (img.Height / 2);
                 Rectangle deckSize = new Rectangle(w,h,img.Width, img.Width);
+
                 if (deckSize.Contains(args.Location)) 
                 {
                     for (int i = 0; i < 10; i++) 
@@ -270,19 +281,7 @@ namespace spider
                 }
             }
 
-            #region pile locations
-            if (inRange(10, args.X, 136)) pileNum = 0;
-            else if (inRange(160, args.X, 286)) pileNum = 1;
-            else if (inRange(310, args.X, 436)) pileNum = 2;
-            else if (inRange(460, args.X, 586)) pileNum = 3;
-            else if (inRange(610, args.X, 736)) pileNum = 4;
-            else if (inRange(760, args.X, 876)) pileNum = 5;
-            else if (inRange(910, args.X, 1036)) pileNum = 6;
-            else if (inRange(1060, args.X, 1186)) pileNum = 7;
-            else if (inRange(1210, args.X, 1336)) pileNum = 8;
-            else if (inRange(1360, args.X, 1486)) pileNum = 9;
-            #endregion
-
+            if (args.X < 1486) pileNum = (args.X / 150);
             if (args.Button == MouseButtons.Left) 
             {
                 pileFrom = pileNum;
@@ -290,25 +289,20 @@ namespace spider
                 fromCard = (args.Y / 55);    
                 if (fromCard >= Piles.piles[pileFrom].Count) fromCard = Piles.piles[pileFrom].Count - 1;
             }
+
             if (args.Button == MouseButtons.Right) 
             {
                 pileTo = pileNum;
                 piles.moveCard(pileFrom, fromCard, pileTo, suitCount);
                 this.Refresh();
-                List<Card> curPile = Piles.piles[pileTo];
-                if (curPile.Count >= 13 && curPile[curPile.Count - 13].Hidden == false)
-                {
-                    for (int i = curPile.Count - 13; i < curPile.Count; i++)
-                    if (curPile[i].Value > curPile[i + 1].Value)
-                    {
-                        curPile.RemoveRange(curPile.Count - 13, 13);
-                    }
-                }
+
                 int emptyPileCount = 0;
+
                 for(int i = 0; i < 10; i++)
                 {
                     if (Piles.piles[i].Count == 0) emptyPileCount++;
                 } 
+
                 if (emptyPileCount == 10) 
                 {
                     MessageBox.Show("Game Over :)");

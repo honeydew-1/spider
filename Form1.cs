@@ -102,6 +102,11 @@ namespace spider
 
         Deck deck = new Deck();
 
+        public List<Card> this[int i]
+        {
+            get => piles[i];
+        }
+
         public Piles()
         {
             piles = new List<List<Card>>();
@@ -128,7 +133,7 @@ namespace spider
                         piles[i].Add(c);
                     }
         }
-
+        
         public void _moveCard(int atPile, int fromCard, int toNextPile)
         {
             for (int i = fromCard; i < piles[atPile].Count; i++) 
@@ -198,9 +203,9 @@ namespace spider
         int pileTo = 0;
         int fromCard = 0;
         int suitCount = 0;
-        bool emptyPileExists = false;
+        
         Deck deck = new Deck();
-        Piles piles = new Piles();
+        public Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
 
         public Form1(int suitCount)
@@ -256,6 +261,13 @@ namespace spider
         {
             Image img = images["BACK"];
 
+            bool emptyPileExists = false;
+            
+            for (int i = 0; i < 10; i++)
+            {
+                if (piles[i].Count == 0) emptyPileExists = true;
+            }
+
             if (deck.Count > 0)
             {
                 int w = this.Width - (img.Width / 2);
@@ -264,15 +276,12 @@ namespace spider
 
                 if (deckSize.Contains(args.Location)) 
                 {
-                    for (int i = 0; i < 10; i++) 
+                    
+                    if (emptyPileExists) 
                     {
-                        if (Piles.piles[i].Count == 0)
-                        {
-                            MessageBox.Show("Can't draw from the deck while there is an empty pile");
-                            emptyPileExists = true;
-                        }
+                        MessageBox.Show("Can't draw from the deck while there is an empty pile");
                     }
-                    if (!emptyPileExists) 
+                    else
                     {
                         piles.addToPiles();
                         this.Refresh();

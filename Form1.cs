@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Linq;
 
 namespace spider
 {
@@ -189,13 +188,6 @@ namespace spider
                 }
             }
             else _moveCard(atPile, fromCard, toNextPile);
-            
-            if (piles[toNextPile].Count >= 13) checkStreak(toNextPile);
-        }
-
-        public void checkStreak(int pile)
-        {
-            
         }
     }  
 
@@ -262,18 +254,19 @@ namespace spider
                 if (deckSize.Contains(args.Location)) 
                 {
                     for (int i = 0; i < 10; i++) 
+                    {
                         if (Piles.piles[i].Count == 0)
                         {
                             MessageBox.Show("Can't draw from the deck while there is an empty pile");
                             emptyPileExists = true;
                         }
+                    }
                     if (!emptyPileExists) 
                     {
                         piles.addToPiles();
                         this.Refresh();
                         emptyPileExists = false;
-                    }    
-                    
+                    }  
                 }
             }
 
@@ -310,6 +303,16 @@ namespace spider
                     {
                         curPile.RemoveRange(curPile.Count - 13, 13);
                     }
+                }
+                int emptyPileCount = 0;
+                for(int i = 0; i < 10; i++)
+                {
+                    if (Piles.piles[i].Count == 0) emptyPileCount++;
+                } 
+                if (emptyPileCount == 10) 
+                {
+                    MessageBox.Show("Game Over :)");
+                    Application.Exit();
                 }
             }
         }

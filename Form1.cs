@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace spider
 {
@@ -133,22 +134,44 @@ namespace spider
                         piles[i].Add(c);
                     }
         }
+
+        private bool isValid(int fromPile, int fromCard)
+        {
+            for (int i = fromCard; i < piles[fromPile].Count - 1; i++)
+            {
+                if (piles[fromPile][i].Value != piles[fromPile][i + 1].Value + 1) return false;
+            }
+            return true;
+        }
         
         public void _moveCard(int atPile, int fromCard, int toNextPile)
         {
-            for (int i = fromCard; i < piles[atPile].Count; i++) 
+            if (fromCard == piles[atPile].Count - 1) 
             {
-                Card c = piles[atPile][i];
-                piles[toNextPile].Add(piles[atPile][i]); 
-            }
-
-            if (fromCard == 0) piles[atPile].Clear();
-            else 
-            {
-                piles[atPile].RemoveRange(fromCard, piles[atPile].Count - fromCard);
+                Card c = piles[atPile][fromCard];
+                piles[toNextPile].Add(c);
+                piles[atPile].Remove(c);
                 piles[atPile][piles[atPile].Count - 1].Hidden = false;
             }
+            else 
+            {
+                if (isValid(atPile, fromCard))
+                {
+                    for (int i = fromCard; i < piles[atPile].Count; i++) 
+                    {
+                        Card c = piles[atPile][i];
+                        piles[toNextPile].Add(piles[atPile][i]); 
+                        piles[atPile][piles[atPile].Count - 1].Hidden = false;
+                    }
 
+                    if (fromCard == 0) piles[atPile].Clear();
+                    else
+                    {
+                        piles[atPile].RemoveRange(fromCard, piles[atPile].Count - fromCard);
+                        piles[atPile][piles[atPile].Count - 1].Hidden = false;
+                    }
+                }
+            }
             List<Card> curPile = Piles.piles[toNextPile];
             if (curPile.Count >= 13 && curPile[curPile.Count - 13].Hidden == false)
                 {

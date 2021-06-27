@@ -245,7 +245,7 @@ namespace spider
                     Card c = new Card(val, suit);
                     images[c.Name] = Image.FromFile(Path.Combine("PNG", c.Name+".png"));
                 }
-            images.Add("BACK",Image.FromFile(Path.Combine("PNG", "Back"+".png")));
+            images.Add("BACK",Image.FromFile(Path.Combine("PNG", "BACK"+".png")));
             InitializeComponent();   
         }
 

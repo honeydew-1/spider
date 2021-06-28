@@ -146,7 +146,7 @@ namespace spider
         
         public void _moveCard(int atPile, int fromCard, int toNextPile)
         {
-            if (fromCard == piles[atPile].Count - 1) 
+            if (fromCard == piles[atPile].Count - 1 && fromCard != 0) 
             {
                 Card c = piles[atPile][fromCard];
                 piles[toNextPile].Add(c);
@@ -172,19 +172,25 @@ namespace spider
                     }
                 }
             }
-            List<Card> curPile = Piles.piles[toNextPile];
-            if (curPile.Count >= 13 && curPile[curPile.Count - 13].Hidden == false)
+            List<Card> curPile = piles[toNextPile];
+            if (piles[toNextPile].Count >= 13 && isValid(toNextPile, curPile.Count - 13 ))
+            {
+                
+                if (curPile.Count >= 13 && curPile[curPile.Count - 13].Hidden == false && isValid(toNextPile, curPile.Count - 13))
                 {
                     for (int i = curPile.Count - 13; i < curPile.Count; i++)
-                    if (curPile[i].Value > curPile[i + 1].Value)
                     {
-                        if (curPile.Count > 13)
+                        if (curPile[i].Value > curPile[i + 1].Value)
                         {
-                            curPile[curPile.Count - 14].Hidden = false;
+                            if (curPile.Count > 13)
+                            {
+                                curPile[curPile.Count - 14].Hidden = false;
+                            }
+                            curPile.RemoveRange(curPile.Count - 13, 13);
                         }
-                        curPile.RemoveRange(curPile.Count - 13, 13);
                     }
                 }
+            }
         }
 
         public void moveCard(int atPile, int fromCard, int toNextPile, int suitCount)

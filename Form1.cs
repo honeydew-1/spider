@@ -341,7 +341,7 @@ namespace spider
                     if (Piles.piles[i].Count == 0) emptyPileCount++;
                 } 
 
-                if (emptyPileCount == 10) 
+                if (emptyPileCount == 10 && deck.Count == 0) 
                 {
                     MessageBox.Show("Game Over :)");
                     Application.Exit();

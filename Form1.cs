@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Linq;
 
 namespace spider
 {
@@ -15,7 +14,7 @@ namespace spider
         public enum Color{RED, BLACK}
         public int Value { get; set; }
         public Suit Rank { get; set; }
-        public Color RB;
+        public Color RB { get; set; }
         public bool Hidden;  
 
         public Card(int value, Suit rank, bool hidden = true)
@@ -42,76 +41,61 @@ namespace spider
             }
         }
 
-        public string Name
-        {
-            get => NamedValue + Rank.ToString();
-        }
+        public string Name => NamedValue + Rank.ToString();
     }
 
     public class Deck
     {
-        public List<Card> deck;
-        
-        
-        public Deck()
-        {
-            deck = new List<Card>();
-            for (int i = 0; i < 2; i++) fillDeck();
-        }
-        
-        private void fillDeck()
-        {
-            for (int i = 0; i < 52; i++)
-            {
-                Suit rank = (Suit)(Math.Floor((decimal)i/13));
-                int val = (i % 13) + 1;
-                deck.Add(new Card(val, rank));
-            }
+        public List<Card> deck { get; set; }
 
-            Random r = new Random();
-            for (int n = deck.Count - 1; n > 0; --n)
-            {
-                int k = r.Next(n+1);
-                Card temp = deck[n];
-                this[n] = this[k];
-                this[k] = temp;
-            }
-        }
-
-        public int Count 
-        {
-            get => deck.Count;
-        }
+        public int Count => deck.Count;
 
         public Card this[int i]
         {
             get => deck[i];
             set => deck[i] = value;
         }
-
+        
+        public Deck()
+        {
+            deck = new List<Card>();
+            for (int j = 0; j < 2; j++)
+            {
+                for (int i = 0; i < 52; i++)
+                {
+                    Suit rank = (Suit)(Math.Floor((decimal)i/13));
+                    int val = (i % 13) + 1;
+                    deck.Add(new Card(val, rank));
+                }
+                Random r = new Random();
+                for (int n = deck.Count - 1; n > 0; --n)
+                {
+                    int k = r.Next(n+1);
+                    Card temp = deck[n];
+                    deck[n] = deck[k];
+                    deck[k] = temp;
+                }
+            }
+        }
+        
         public Card drawFromDeck()
         {
-            Card c = this[this.Count - 1];
-            deck.RemoveAt(this.Count - 1);
+            Card c = deck[deck.Count - 1];
+            deck.RemoveAt(deck.Count - 1);
             return c;
         }
     }
 
     public class Piles
     {
-        public static List<List<Card>> piles;
+        public static List<List<Card>> piles = new List<List<Card>>();
 
         Deck deck = new Deck();
 
-        public List<Card> this[int i]
-        {
-            get => piles[i];
-        }
+        public List<Card> this[int i] => piles[i];
 
         public Piles()
-        {
-            piles = new List<List<Card>>();
-            
+        {   
             for (int i = 0; i < 10; i++)
             {
                 int fiveOrSix = 5;
@@ -233,7 +217,7 @@ namespace spider
         int fromCard = 0;
         int suitCount = 0;
         
-        Deck deck = new Deck();
+        public Deck deck = new Deck();
         public Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
 
@@ -314,6 +298,7 @@ namespace spider
                     {
                         piles.addToPiles();
                         this.Refresh();
+                        MessageBox.Show(deck.deck.Count.ToString());
                         emptyPileExists = false;
                     }  
                 }

@@ -71,9 +71,7 @@ namespace spider
                 for (int n = deck.Count - 1; n > 0; --n)
                 {
                     int k = r.Next(n+1);
-                    Card temp = deck[n];
-                    deck[n] = deck[k];
-                    deck[k] = temp;
+                    (deck[n], deck[k]) = (deck[k], deck[n]);
                 }
             }
         }
@@ -88,14 +86,13 @@ namespace spider
 
     public class Piles
     {
-        public static List<List<Card>> piles = new List<List<Card>>();
-
-        Deck deck = new Deck();
+        public List<List<Card>> piles = new List<List<Card>>();
 
         public List<Card> this[int i] => piles[i];
-
+        public Deck deck  = new Deck();
+        
         public Piles()
-        {   
+        { 
             for (int i = 0; i < 10; i++)
             {
                 int fiveOrSix = 5;
@@ -217,7 +214,6 @@ namespace spider
         int fromCard = 0;
         int suitCount = 0;
         
-        public Deck deck = new Deck();
         public Piles piles = new Piles();
         Dictionary<string, Image> images = new Dictionary<string, Image>();
 
@@ -243,7 +239,7 @@ namespace spider
         {
             Graphics g = e.Graphics;
 
-            if (deck.Count > 0)
+            if (piles.deck.Count > 0)
             {
                 Image deckImg = images["BACK"];
                 int w = this.Width - (deckImg.Width / 2);
@@ -256,9 +252,9 @@ namespace spider
             {
                 int y = 10;
                 Image img = null;
-                for (int j = 0; j < Piles.piles[i].Count; j++)
+                for (int j = 0; j < piles[i].Count; j++)
                 {
-                    Card c = Piles.piles[i][j];
+                    Card c = piles[i][j];
                     if (c.Hidden) img = images["BACK"];
                     else img = images[c.Name]; 
                     g.DrawImage(img, x, y);
@@ -281,7 +277,7 @@ namespace spider
                 if (piles[i].Count == 0) emptyPileExists = true;
             }
 
-            if (deck.Count > 0)
+            if (piles.deck.Count > 0)
             {
                 int w = this.Width - (img.Width / 2);
                 int h = this.Height - (img.Height / 2);
@@ -298,7 +294,6 @@ namespace spider
                     {
                         piles.addToPiles();
                         this.Refresh();
-                        MessageBox.Show(deck.deck.Count.ToString());
                         emptyPileExists = false;
                     }  
                 }
@@ -308,9 +303,9 @@ namespace spider
             if (args.Button == MouseButtons.Left) 
             {
                 pileFrom = pileNum;
-                int pileImgSize = ((Piles.piles[pileFrom].Count - 1) * 50) + 10;
+                int pileImgSize = ((piles[pileFrom].Count - 1) * 50) + 10;
                 fromCard = (args.Y / 55);    
-                if (fromCard >= Piles.piles[pileFrom].Count) fromCard = Piles.piles[pileFrom].Count - 1;
+                if (fromCard >= piles[pileFrom].Count) fromCard = piles[pileFrom].Count - 1;
             }
 
             if (args.Button == MouseButtons.Right) 
@@ -323,10 +318,10 @@ namespace spider
 
                 for(int i = 0; i < 10; i++)
                 {
-                    if (Piles.piles[i].Count == 0) emptyPileCount++;
+                    if (piles[i].Count == 0) emptyPileCount++;
                 } 
 
-                if (emptyPileCount == 10 && deck.Count == 0) 
+                if (emptyPileCount == 10 && piles.deck.Count == 0) 
                 {
                     MessageBox.Show("Game Over :)");
                     Application.Exit();

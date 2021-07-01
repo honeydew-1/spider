@@ -7,41 +7,40 @@ using System.Windows.Forms;
 namespace spider
 {
     public enum Suit {C, D, H, S}
-
+    
     public class Card
     {
-        
-        public enum Color{RED, BLACK}
-        public int Value { get; set; }
-        public Suit Rank { get; set; }
-        public Color RB { get; set; }
-        public bool Hidden;  
+        public enum Color {RED, BLACK}
+        public int value { get; set; }
+        public Suit rank { get; set; }
+        public Color color { get; set; }
+        public bool hidden;  
 
         public Card(int value, Suit rank, bool hidden = true)
         {
-            this.Value = value;
-            this.Rank = rank;
-            if (this.Rank == Suit.H || this.Rank == Suit.D) this.RB = Color.RED;
-            if (this.Rank == Suit.C || this.Rank == Suit.S) this.RB = Color.BLACK;
-            this.Hidden = hidden;
+            this.value = value;
+            this.rank = rank;
+            if (this.rank == Suit.H || this.rank == Suit.D) this.color = Color.RED;
+            if (this.rank == Suit.C || this.rank == Suit.S) this.color = Color.BLACK;
+            this.hidden = hidden;
         }
 
-        private string NamedValue
+        private string namedValue
         {
             get
             {
-                switch (Value)
+                switch (value)
                 {
                     case 1: return "A";
                     case 13: return "K";
                     case 12: return "Q";
                     case 11: return "J";
-                    default: return Value.ToString();
+                    default: return value.ToString();
                 }
             }
         }
 
-        public string Name => NamedValue + Rank.ToString();
+        public string name => namedValue + rank.ToString();
     }
 
     public class Deck
@@ -101,7 +100,7 @@ namespace spider
                 for (int j = 0; j < fiveOrSix; j++) subPiles.Add(deck.drawFromDeck());
                 piles.Add(subPiles);
                 int pileSize = piles[i].Count - 1;
-                piles[i][pileSize].Hidden = false;
+                piles[i][pileSize].hidden = false;
             }
         }
 
@@ -111,7 +110,7 @@ namespace spider
                     for (int j = 0; j < 1; j++) 
                     {
                         Card c = deck.drawFromDeck();
-                        c.Hidden = false;
+                        c.hidden = false;
                         piles[i].Add(c);
                     }
         }
@@ -120,7 +119,7 @@ namespace spider
         {
             for (int i = fromCard; i < piles[fromPile].Count - 1; i++)
             {
-                if (piles[fromPile][i].Value != piles[fromPile][i + 1].Value + 1) return false;
+                if (piles[fromPile][i].value != piles[fromPile][i + 1].value + 1) return false;
             }
             return true;
         }
@@ -132,7 +131,7 @@ namespace spider
                 Card c = piles[atPile][fromCard];
                 piles[toNextPile].Add(c);
                 piles[atPile].Remove(c);
-                piles[atPile][piles[atPile].Count - 1].Hidden = false;
+                piles[atPile][piles[atPile].Count - 1].hidden = false;
             }
             else 
             {
@@ -142,14 +141,14 @@ namespace spider
                     {
                         Card c = piles[atPile][i];
                         piles[toNextPile].Add(piles[atPile][i]); 
-                        piles[atPile][piles[atPile].Count - 1].Hidden = false;
+                        piles[atPile][piles[atPile].Count - 1].hidden = false;
                     }
 
                     if (fromCard == 0) piles[atPile].Clear();
                     else
                     {
                         piles[atPile].RemoveRange(fromCard, piles[atPile].Count - fromCard);
-                        piles[atPile][piles[atPile].Count - 1].Hidden = false;
+                        piles[atPile][piles[atPile].Count - 1].hidden = false;
                     }
                 }
             }
@@ -157,15 +156,15 @@ namespace spider
             if (piles[toNextPile].Count >= 13 && isValid(toNextPile, curPile.Count - 13 ))
             {
                 
-                if (curPile.Count >= 13 && curPile[curPile.Count - 13].Hidden == false && isValid(toNextPile, curPile.Count - 13))
+                if (curPile.Count >= 13 && curPile[curPile.Count - 13].hidden == false && isValid(toNextPile, curPile.Count - 13))
                 {
                     for (int i = curPile.Count - 13; i < curPile.Count; i++)
                     {
-                        if (curPile[i].Value > curPile[i + 1].Value)
+                        if (curPile[i].value > curPile[i + 1].value)
                         {
                             if (curPile.Count > 13)
                             {
-                                curPile[curPile.Count - 14].Hidden = false;
+                                curPile[curPile.Count - 14].hidden = false;
                             }
                             curPile.RemoveRange(curPile.Count - 13, 13);
                         }
@@ -184,21 +183,21 @@ namespace spider
             
                 if (suitCount == 1)
                 {
-                    if (cardToMove.Value + 1 == cardToCheck.Value)
+                    if (cardToMove.value + 1 == cardToCheck.value)
                         _moveCard(atPile, fromCard, toNextPile);
                 }
 
                 if (suitCount == 2)
                 {
-                    if (cardToMove.RB == cardToCheck.RB 
-                        && cardToMove.Value + 1 == cardToCheck.Value)
+                    if (cardToMove.color == cardToCheck.color 
+                        && cardToMove.value + 1 == cardToCheck.value)
                             _moveCard(atPile, fromCard, toNextPile);
                 }
 
                 if (suitCount == 4)
                 {
-                    if (cardToMove.Rank == cardToCheck.Rank 
-                        && cardToMove.Value + 1 == cardToCheck.Value)
+                    if (cardToMove.rank == cardToCheck.rank 
+                        && cardToMove.value + 1 == cardToCheck.value)
                             _moveCard(atPile, fromCard, toNextPile);
                 }
             }
@@ -229,7 +228,7 @@ namespace spider
                 for (int val = 1 ; val <= 13 ; ++val) 
                 {
                     Card c = new Card(val, suit);
-                    images[c.Name] = Image.FromFile(Path.Combine("PNG", c.Name+".png"));
+                    images[c.name] = Image.FromFile(Path.Combine("PNG", c.name+".png"));
                 }
             images.Add("BACK",Image.FromFile(Path.Combine("PNG", "BACK"+".png")));
             InitializeComponent();   
@@ -255,8 +254,8 @@ namespace spider
                 for (int j = 0; j < piles[i].Count; j++)
                 {
                     Card c = piles[i][j];
-                    if (c.Hidden) img = images["BACK"];
-                    else img = images[c.Name]; 
+                    if (c.hidden) img = images["BACK"];
+                    else img = images[c.name]; 
                     g.DrawImage(img, x, y);
                     y += 50;
                 }

@@ -15,11 +15,13 @@ namespace spider
         public Suit rank { get; set; }
         public Color color { get; set; }
         public bool hidden;  
+        public bool selected;
 
-        public Card(int value, Suit rank, bool hidden = true)
+        public Card(int value, Suit rank, bool hidden = true, bool selected = false)
         {
             this.value = value;
             this.rank = rank;
+            this.selected = selected;
             if (this.rank == Suit.H || this.rank == Suit.D) this.color = Color.RED;
             if (this.rank == Suit.C || this.rank == Suit.S) this.color = Color.BLACK;
             this.hidden = hidden;
@@ -152,6 +154,7 @@ namespace spider
                     }
                 }
             }
+            
             List<Card> curPile = piles[toNextPile];
             if (piles[toNextPile].Count >= 13 && isValid(toNextPile, curPile.Count - 13 ))
             {
@@ -256,6 +259,12 @@ namespace spider
                     Card c = piles[i][j];
                     if (c.hidden) img = images["BACK"];
                     else img = images[c.name]; 
+                    if (c.selected)
+                    {
+                        Pen b = new Pen(Color.Blue, 3);
+                        Rectangle r = new Rectangle(pileFrom * 150, fromCard * 55, 126, 200);
+                        g.DrawRectangle(b, r);
+                    }
                     g.DrawImage(img, x, y);
                     y += 50;
                 }
@@ -305,6 +314,9 @@ namespace spider
                 int pileImgSize = ((piles[pileFrom].Count - 1) * 50) + 10;
                 fromCard = (args.Y / 55);    
                 if (fromCard >= piles[pileFrom].Count) fromCard = piles[pileFrom].Count - 1;
+                piles[pileFrom][fromCard].selected = true;
+                this.Refresh();
+                piles[pileFrom][fromCard].selected = false;
             }
 
             if (args.Button == MouseButtons.Right) 

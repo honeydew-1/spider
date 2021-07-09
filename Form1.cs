@@ -262,7 +262,7 @@ namespace spider
                     if (c.selected)
                     {
                         Pen b = new Pen(Color.Blue, 3);
-                        Rectangle r = new Rectangle(pileFrom * 150, fromCard * 55, 126, 200);
+                        Rectangle r = new Rectangle(pileFrom * 153, fromCard * 52, 126, 200);
                         g.DrawRectangle(b, r);
                     }
                     g.DrawImage(img, x, y);

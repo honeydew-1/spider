@@ -7,13 +7,13 @@ using System.Windows.Forms;
 namespace spider
 {
     public enum Suit {C, D, H, S}
+    public enum Type {RED, BLACK}
     
     public class Card
     {
-        public enum Color {RED, BLACK}
         public int value { get; set; }
         public Suit rank { get; set; }
-        public Color color { get; set; }
+        public Type color { get; set; }
         public bool hidden;  
         public bool selected;
 
@@ -22,8 +22,8 @@ namespace spider
             this.value = value;
             this.rank = rank;
             this.selected = selected;
-            if (this.rank == Suit.H || this.rank == Suit.D) this.color = Color.RED;
-            if (this.rank == Suit.C || this.rank == Suit.S) this.color = Color.BLACK;
+            if (this.rank == Suit.H || this.rank == Suit.D) this.color = Type.RED;
+            if (this.rank == Suit.C || this.rank == Suit.S) this.color = Type.BLACK;
             this.hidden = hidden;
         }
 
@@ -237,43 +237,6 @@ namespace spider
             InitializeComponent();   
         }
 
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            Graphics g = e.Graphics;
-
-            if (piles.deck.Count > 0)
-            {
-                Image deckImg = images["BACK"];
-                int w = this.Width - (deckImg.Width / 2);
-                int h = this.Height - (deckImg.Height / 2);
-                g.DrawImage(deckImg, w, h);
-            } 
-
-            int x = 10;
-            for (int i = 0; i < 10; i++)
-            {
-                int y = 10;
-                Image img = null;
-                for (int j = 0; j < piles[i].Count; j++)
-                {
-                    Card c = piles[i][j];
-                    if (c.hidden) img = images["BACK"];
-                    else img = images[c.name]; 
-                    if (c.selected)
-                    {
-                        Pen b = new Pen(Color.Blue, 3);
-                        Rectangle r = new Rectangle(pileFrom * 153, fromCard * 52, 126, 200);
-                        g.DrawRectangle(b, r);
-                    }
-                    g.DrawImage(img, x, y);
-                    y += 50;
-                }
-                x += 150;
-            }
-        }   
-
-        bool inRange(int lo, int val, int hi) => lo < val && hi > val;    
-        
         protected override void OnMouseDown(MouseEventArgs args) 
         {
             Image img = images["BACK"];
@@ -339,5 +302,48 @@ namespace spider
                 }
             }
         }
-    }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+
+            if (piles.deck.Count > 0)
+            {
+                Image deckImg = images["BACK"];
+                int w = this.Width - (deckImg.Width / 2);
+                int h = this.Height - (deckImg.Height / 2);
+                g.DrawImage(deckImg, w, h);
+            } 
+
+            int x = 10;
+            for (int i = 0; i < 10; i++)
+            {
+                int y = 10;
+                Image img = null;
+                for (int j = 0; j < piles[i].Count; j++)
+                {
+                    Card c = piles[i][j];
+                    if (c.hidden) img = images["BACK"];
+                    else img = images[c.name]; 
+                    g.DrawImage(img, x, y);
+                    y += 50;
+                }
+                x += 150;
+            }
+
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < piles[i].Count; j++)
+                {
+                    Card c = piles[i][j];
+                    if (c.selected && !c.hidden)
+                    {
+                        Pen p = new Pen(Color.Goldenrod, 3);
+                        Rectangle r = new Rectangle();
+                        r.Width = 126; r.Height = 200;
+                        r.Location = new Point(10 + (pileFrom * 150),((fromCard * 50) + 10));
+                        g.DrawRectangle(p, r);
+                    }
+                }
+        }   
+    }   
 }
